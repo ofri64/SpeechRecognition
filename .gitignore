@@ -1,0 +1,19 @@
+# ignore .idea folder
+.idea/
+
+# ignore virtual enviroment folder
+venv/
+
+# ignore data folders
+train_data/
+test_files/
+
+# ignore pychach
+*/__pycache__
+__pycache__
+
+# ignore pdf
+*.pdf
+
+# ignore .DS_STORE
+.DS_STORE
