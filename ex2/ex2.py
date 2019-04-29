@@ -1,8 +1,10 @@
 from read_write_data import load_train_data, load_test_data, write_results
 from models import predict_one_nn, DTW
+# from omer_models import dtw_fast
 import numpy as np
 
 if __name__ == '__main__':
+
     train_data = load_train_data()
     test_data = load_test_data()
 
