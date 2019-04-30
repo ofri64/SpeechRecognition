@@ -13,7 +13,7 @@ if __name__ == '__main__':
     for _, test_sample in test_data:
 
         # euclidian distance 1-nn classifier
-        euc_label = predict_one_nn(train_data, test_sample, lambda x, y: np.linalg.norm(x-y))
+        euc_label = predict_one_nn(train_data, test_sample, lambda x, y: np.average(np.linalg.norm(x-y, axis=0)))
         euc_predictions.append(euc_label)
 
         # DTW distance 1-nn classifier
