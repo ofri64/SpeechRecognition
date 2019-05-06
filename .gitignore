@@ -17,3 +17,6 @@ __pycache__
 
 # ignore .DS_STORE
 .DS_STORE
+
+# ignore details.txt
+details.txt
