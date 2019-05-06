@@ -61,10 +61,17 @@ def perform_mfcc_transform(file_path):
 def normalize_training_data(train_data):
     train_data_samples, train_data_labels = zip(*train_data)
     train_data_samples = np.array(train_data_samples)
+
+    num_features = train_data_samples.shape[2]
+    num_samples = train_data_samples.shape[0]
+    num_time_frames = train_data_samples.shape[1]
+
+    train_data_samples = train_data_samples.reshape((-1, num_features))
     data_mean = np.mean(train_data_samples, axis=0)
     data_std = np.std(train_data_samples, axis=0)
 
     train_data_normalized = (train_data_samples - data_mean) / data_std
+    train_data_normalized = train_data_normalized.reshape((num_samples, num_time_frames, num_features))
     train_data_normalized = [train_sample for train_sample in train_data_normalized]
     train_data = list(zip(train_data_normalized, train_data_labels))
     return train_data, data_mean, data_std
@@ -72,7 +79,16 @@ def normalize_training_data(train_data):
 
 def normalize_test_data(test_data, data_mean, data_std):
     test_file_names, test_data_samples = zip(*test_data)
+
+    test_data_samples = np.array(test_data_samples)
+
+    num_features = test_data_samples.shape[2]
+    num_samples = test_data_samples.shape[0]
+    num_time_frames = test_data_samples.shape[1]
+
+    test_data_samples = test_data_samples.reshape((-1, num_features))
     test_data_normalized = (test_data_samples - data_mean) / data_std
+    test_data_normalized = test_data_normalized.reshape((num_samples, num_time_frames, num_features))
     test_data_normalized = [test_sample for test_sample in test_data_normalized]
 
     return list(zip(test_file_names, test_data_normalized))
