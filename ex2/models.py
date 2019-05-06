@@ -9,13 +9,11 @@ def predict_one_nn(train_data, test_sample, distance_metric):
 
 
 def d(x1, x2, i, j):
-    return np.linalg.norm(x1[:, i] - x2[:, j])
+    return np.linalg.norm(x1[i, :] - x2[j, :])
 
 
 def DTW(x1, x2):
-    x1_num_time_stamps = x1.shape[1] - 1
-    x2_num_time_stamps = x1.shape[1] - 1
-    return recursive_DTW(x1, x2, x1_num_time_stamps, x2_num_time_stamps, {})
+    return recursive_DTW(x1, x2, len(x1) - 1, len(x2) - 1, {})
 
 
 def recursive_DTW(x1, x2, i, j, memo):
