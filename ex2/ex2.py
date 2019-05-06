@@ -4,8 +4,8 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    train_data, data_mean, data_std = load_train_data()
-    test_data = load_test_data(data_mean, data_std)
+    train_data = load_train_data()
+    test_data = load_test_data()
 
     euc_predictions = []
     dtw_predictions = []
