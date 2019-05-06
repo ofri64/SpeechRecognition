@@ -1,5 +1,6 @@
 import os
 import librosa
+import numpy as np
 
 LABEL_MAPPING = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
 
@@ -19,10 +20,13 @@ def load_train_data():
             mfcc = perform_mfcc_transform(file_path)
             train_data.append((mfcc, label))
 
-    return train_data
+    # normalize training data
+    train_data, data_mean, data_std = normalize_training_data(train_data)
+
+    return train_data, data_mean, data_std
 
 
-def load_test_data():
+def load_test_data(data_mean, data_std):
     test_data = []
     test_folder = "test_files"
     for file_name in os.listdir(test_folder):
@@ -33,6 +37,9 @@ def load_test_data():
         file_path = os.path.join(test_folder, file_name)
         mfcc = perform_mfcc_transform(file_path)
         test_data.append((file_name, mfcc))
+
+    # normalize according to mean and std from training set
+    test_data = normalize_test_data(test_data, data_mean, data_std)
 
     return test_data
 
@@ -49,6 +56,26 @@ def perform_mfcc_transform(file_path):
     mfcc = mfcc.transpose()
 
     return mfcc
+
+
+def normalize_training_data(train_data):
+    train_data_samples, train_data_labels = zip(*train_data)
+    train_data_samples = np.array(train_data_samples)
+    data_mean = np.mean(train_data_samples, axis=0)
+    data_std = np.std(train_data_samples, axis=0)
+
+    train_data_normalized = (train_data_samples - data_mean) / data_std
+    train_data_normalized = [train_sample for train_sample in train_data_normalized]
+    train_data = list(zip(train_data_normalized, train_data_labels))
+    return train_data, data_mean, data_std
+
+
+def normalize_test_data(test_data, data_mean, data_std):
+    test_file_names, test_data_samples = zip(*test_data)
+    test_data_normalized = (test_data_samples - data_mean) / data_std
+    test_data_normalized = [test_sample for test_sample in test_data_normalized]
+
+    return list(zip(test_file_names, test_data_normalized))
 
 
 def write_results(test_names, euc_predictions, dtw_predictions):
