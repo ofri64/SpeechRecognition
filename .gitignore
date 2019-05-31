@@ -20,3 +20,6 @@ __pycache__
 
 # ignore details.txt
 details.txt
+
+# ignore data/weights numpy files
+*.npy
