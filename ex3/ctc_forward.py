@@ -35,11 +35,7 @@ def compute_alpha_s_t(s, t, alpha_dict, outputs_mat, transcript, alphabet_index_
 
     # recursion
     t_s = transcript[s]
-    if t_s == EMPTY:
-        return (alpha_s_t(s, t - 1, alpha_dict) + alpha_s_t(s - 1, t - 1, alpha_dict)) * outputs_mat[
-            t, alphabet_index_trans[t_s]]
-
-    if s > 1 and transcript[s] == transcript[s - 2]:
+    if t_s == EMPTY or (s > 1 and transcript[s] == transcript[s - 2]):
         return (alpha_s_t(s, t - 1, alpha_dict) + alpha_s_t(s - 1, t - 1, alpha_dict)) * outputs_mat[
             t, alphabet_index_trans[t_s]]
 
