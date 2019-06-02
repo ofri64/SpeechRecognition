@@ -23,13 +23,14 @@ def get_transcript_prob(outputs_mat, transcript, alphabet_index_trans):
 
 
 def compute_alpha_s_t(s, t, alpha_dict, outputs_mat, transcript, alphabet_index_trans):
-    # base case
+    # base cases
     if s < 0:
         return 0
 
     modified_transcript_len = len(transcript)
     original_transcript_len = len(outputs_mat)  # also known as T
     if s < modified_transcript_len - 2 * (original_transcript_len - t):
+        # not enough time steps left to complete the full transcription
         return 0
 
     # recursion
