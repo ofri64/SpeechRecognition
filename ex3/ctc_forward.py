@@ -19,7 +19,6 @@ def get_transcript_prob(outputs_mat, transcript, alphabet_index_trans):
         for s in range(l):
             alpha[(s, t)] = compute_alpha_s_t(s, t, alpha, outputs_mat, transcript, alphabet_index_trans)
 
-    print(alpha)
     return alpha[(l - 1, T - 1)] + alpha[(l - 2, T - 1)]
 
 

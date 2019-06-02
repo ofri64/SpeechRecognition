@@ -15,9 +15,5 @@ if __name__ == '__main__':
     modified_transcript = parse_data.get_modified_transcript(transcript)
     alpha_to_index = parse_data.get_alphabet_index_translation(alphabet_string)
 
-    print(output_mat)
-    print(modified_transcript)
-    print(alpha_to_index)
-
     prob = ctc_forward.get_transcript_prob(output_mat, modified_transcript, alpha_to_index)
     print(prob)
