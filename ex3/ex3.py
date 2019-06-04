@@ -16,4 +16,7 @@ if __name__ == '__main__':
     alpha_to_index = parse_data.get_alphabet_index_translation(alphabet_string)
 
     prob = ctc_forward.get_transcript_prob(output_mat, modified_transcript, alpha_to_index)
-    print(prob)
+    prob_two_digits = str(prob)[:4]
+    prob_two_digits_with_round = "{0:.2f}".format(prob)
+    print(prob_two_digits)
+    print(prob_two_digits_with_round)
