@@ -23,3 +23,7 @@ details.txt
 
 # ignore data/weights numpy files
 *.npy
+
+# ignore wav files
+*.wav
+*.WAV
