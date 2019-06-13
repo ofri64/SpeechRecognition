@@ -1,7 +1,7 @@
-from gcommand_loader import GCommandLoader, GCommandLoaderSeqLabels
+from gcommand_loader import GCommandLoader, DatasetLoaderParser
 import torch
 
-dataset = GCommandLoaderSeqLabels('./data/valid')
+dataset = DatasetLoaderParser('./data/valid')
 
 test_loader = torch.utils.data.DataLoader(
         dataset, batch_size=100, shuffle=None,

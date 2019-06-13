@@ -164,20 +164,25 @@ class GCommandLoader(data.Dataset):
         return len(self.spects)
 
 
-class GCommandLoaderSeqLabels(data.Dataset):
+class DatasetLoaderParser(data.Dataset):
 
     def __init__(self, root, transform=None, target_transform=None, window_size=.02,
-                 window_stride=.01, window_type='hamming', normalize=True, max_len=101):
+                 window_stride=.01, window_type='hamming', normalize=True, max_len=101,
+                 blank_symbol='|', pad_symbol='~'):
+
         spects = make_dataset_raw_labels(root)
         chr2idx = get_characters_indices()
-        chr2idx["<blank>"] = 0  # add the blank symbol to chars to index dictionary as the first index
-        chr2idx["<pad>"] = len(chr2idx)  # add padding symbol as the last index
+        chr2idx[blank_symbol] = 0  # add the blank symbol to chars to index dictionary as the first index
+        chr2idx[pad_symbol] = len(chr2idx)  # add padding symbol as the last index
+        idx2chr = {value: key for key, value in chr2idx.items()}
+
         if len(spects) == 0:
             raise (RuntimeError("Found 0 sound files in subfolders of: " + root + "Supported audio file extensions are: " + ",".join(AUDIO_EXTENSIONS)))
 
         self.root = root
         self.spects = spects
         self.char2idx = chr2idx
+        self.idx2chr = idx2chr
         self.transform = transform
         self.target_transform = target_transform
         self.loader = spect_loader
@@ -186,6 +191,9 @@ class GCommandLoaderSeqLabels(data.Dataset):
         self.window_type = window_type
         self.normalize = normalize
         self.max_len = max_len
+        self.blank_symbol = blank_symbol
+        self.pad_symbol = pad_symbol
+        self.pad_idx = len(chr2idx)
 
     def __getitem__(self, index):
         """
@@ -208,6 +216,27 @@ class GCommandLoaderSeqLabels(data.Dataset):
         return len(self.spects)
 
     def get_target_seq(self, target, max_seq_length=6):
-        padding = ["<pad>" for _ in range(max_seq_length - len(target))]
+        padding = [self.pad_symbol for _ in range(max_seq_length - len(target))]
         idxs = [self.char2idx[c] for c in target] + [self.char2idx[p] for p in padding]
         return torch.tensor(idxs, dtype=torch.int32)
+
+    @staticmethod
+    def transcript_postprocessing(seq_labels):
+
+        # first step - remove duplicates
+        out_transcript = seq_labels[0]
+        for i in range(1, len(seq_labels)):
+            prev = seq_labels[i-1]
+            current = seq_labels[i]
+            if current != prev:
+                out_transcript += current
+
+        # remove "blank" char - its index is 0
+        out_transcript = "".join([c for c in out_transcript if c != '0'])
+
+        return out_transcript
+
+    def idx_transcript_to_word(self, out_transcript):
+        idx2char = {value: key for key, value in self.char2idx.values()}
+        word = "".join([idx2char[idx] for idx in out_transcript])
+        return word

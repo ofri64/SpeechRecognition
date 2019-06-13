@@ -27,6 +27,6 @@ class DeepSpeech(nn.Module):
         x = self.dropout2(x)
         x = x.permute(1, 0, 2)  # transpose to Batch, Sequence, Features
         x = F.relu(self.fc(x))
-        out = F.log_softmax(x, dim=2)
-        out = out.permute(1, 0, 2)  # transpose again but now to Sequence, Batch, Features - this is mandatory for CTC loss
-        return out
+        x = F.log_softmax(x, dim=2)
+        x = x.permute(1, 0, 2)  # transpose again but now to Sequence, Batch, Features - this is mandatory for CTC loss
+        return x
