@@ -220,8 +220,7 @@ class DatasetLoaderParser(data.Dataset):
         idxs = [self.char2idx[c] for c in target] + [self.char2idx[p] for p in padding]
         return torch.tensor(idxs, dtype=torch.int32)
 
-    @staticmethod
-    def transcript_postprocessing(seq_labels):
+    def transcript_postprocessing(self, seq_labels):
 
         # first step - remove duplicates
         out_transcript = seq_labels[0]
@@ -231,8 +230,8 @@ class DatasetLoaderParser(data.Dataset):
             if current != prev:
                 out_transcript += current
 
-        # remove "blank" char - its index is 0
-        out_transcript = "".join([c for c in out_transcript if c != '0'])
+        # remove "blank" char
+        out_transcript = "".join([c for c in out_transcript if c != self.blank_symbol])
 
         return out_transcript
 
