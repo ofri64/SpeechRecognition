@@ -67,37 +67,38 @@ for epoch in range(num_epochs):
 
     torch.save(model.state_dict(), "deep_speech.pth")
 
+    # evaluate using a greedy tagger over training and validation sets
+    model.load_state_dict(torch.load("deep_speech.pth"))
+    model.to(device)
+    model.eval()
 
+    with torch.no_grad():
 
-# # evaluate using a greedy tagger over training and validation sets
-# model.load_state_dict(torch.load("deep_speech.pth"))
-# model.to(device)
-# model.eval()
-#
-# with torch.no_grad():
-#
-#     # switch model to evaluate mode
-#
-#     total_cer = 0
-#     num_train_samples = len(train_loader_single_sample)
-#     for data in train_loader_single_sample:
-#         input_, label = data[0].to(device), data[1].to(device)
-#
-#         # greedy prediction
-#         output = model(input_)
-#         _, predicted = torch.max(output, dim=2)
-#
-#         # post processing output
-#
-#         label = label.flatten()
-#         label = label[label != pad_idx]  # remove padding
-#         label_transcript = "".join([idx2char[idx] for idx in label.numpy()])  # convert back to string
-#
-#         blank_transcript = "".join([idx2char[idx] for idx in predicted.flatten().numpy()])
-#         out_transcript = train_dataset.transcript_postprocessing(blank_transcript)  # remove blanks
-#
-#         total_cer += cer(out_transcript, label_transcript)  # compare predicted and label transcripts
-#         print(out_transcript, label_transcript)
-#
-#     epoch_cer = total_cer / num_train_samples
-#     # print(f"Epoch {epoch + 1}: Training set CER is: {epoch_cer}")
+        # switch model to evaluate mode
+
+        total_cer = 0
+        num_train_samples = len(train_loader_single_sample)
+        for i, data in enumerate(train_loader_single_sample):
+            input_, label = data[0].to(device), data[1].to(device)
+
+            # greedy prediction
+            output = model(input_)
+            _, predicted = torch.max(output, dim=2)
+
+            # post processing output
+
+            label = label.flatten()
+            label = label[label != pad_idx]  # remove padding
+            label_transcript = "".join([idx2char[idx] for idx in label.numpy()])  # convert back to string
+
+            blank_transcript = "".join([idx2char[idx] for idx in predicted.flatten().numpy()])
+            out_transcript = train_dataset.transcript_postprocessing(blank_transcript)  # remove blanks
+
+            total_cer += cer(out_transcript, label_transcript)  # compare predicted and label transcripts
+
+            # print the output transcript and the true label every once in a while
+            if i % 3000 == 0:
+                print(f"Model predicted transcript: {out_transcript}, while gold label is: {label_transcript}")
+
+        epoch_cer = total_cer / num_train_samples
+        print(f"Epoch {epoch + 1}: Training set CER is: {epoch_cer}")
