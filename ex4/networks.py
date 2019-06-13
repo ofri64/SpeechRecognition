@@ -7,7 +7,7 @@ class DeepSpeech(nn.Module):
         super(DeepSpeech, self).__init__()
         self.vocab_size = vocab_size
         self.dropout1 = nn.Dropout(p=0.4)
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=10, kernel_size=3, stride=2)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=10, kernel_size=3, stride=3)
         self.conv2 = nn.Conv2d(in_channels=10, out_channels=30, kernel_size=3, stride=3)
         self.lstm_1 = nn.LSTM(input_size=780, hidden_size=200, bidirectional=True)
         self.dropout2 = nn.Dropout(p=0.5)
