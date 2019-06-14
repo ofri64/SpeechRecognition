@@ -27,8 +27,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = DeepSpeech(vocab_size=len(char_vocab)).to(device)
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 ctc_loss = nn.CTCLoss()
-num_epochs = 50
-lowest_epoch_lost = 10000
+num_epochs = 75
+lowest_validation_cer = 10000
 
 for epoch in range(num_epochs):
 
@@ -57,16 +57,11 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         # loss statistics
-        running_loss += loss.item()
         epoch_loss += loss.item()
-        if i % 200 == 0:  # print every 200 mini-batches
-            print('[%d, %5d] average loss: %.3f' % (epoch + 1, i, running_loss / 200))
-            running_loss = 0
 
     epoch_loss /= len(train_loader)
-    if epoch_loss < lowest_epoch_lost:
-        lowest_epoch_lost = epoch_loss
-        torch.save(model.state_dict(), "deep_speech.pth")
+    print(f"Epoch {i} Loss is: {epoch_loss}")
+
 
 # evaluate using a greedy tagger over training and validation sets
 # model.load_state_dict(torch.load("deep_speech.pth"))
@@ -134,3 +129,7 @@ for epoch in range(num_epochs):
 
         epoch_cer = total_cer / num_train_samples
         print(f"Epoch {epoch + 1}: Validation set CER is: {epoch_cer}")
+
+        if epoch_cer < lowest_validation_cer:
+            lowest_validation_cer = epoch_cer
+            torch.save(model.state_dict(), "deep_speech.pth")
