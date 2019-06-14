@@ -60,7 +60,7 @@ for epoch in range(num_epochs):
         epoch_loss += loss.item()
 
     epoch_loss /= len(train_loader)
-    print(f"Epoch {i} Loss is: {epoch_loss}")
+    print(f"Epoch {epoch + 1} Loss is: {epoch_loss}")
 
 
 # evaluate using a greedy tagger over training and validation sets
@@ -118,7 +118,7 @@ for epoch in range(num_epochs):
             total_cer += validation_dataset.get_batch_cer(out_transcript, labels)  # compare predicted and label transcripts
 
             # print the output transcript and the true label every once in a while
-            if i % 10000 == 0:
+            if i % 20 == 0:
                 transcript = out_transcript[0]
                 label = labels[0]
 
