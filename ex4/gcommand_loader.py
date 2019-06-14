@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
+from cer import cer
+
 AUDIO_EXTENSIONS = [
     '.wav', '.WAV',
 ]
@@ -194,6 +196,7 @@ class DatasetLoaderParser(data.Dataset):
         self.blank_symbol = blank_symbol
         self.pad_symbol = pad_symbol
         self.pad_idx = len(chr2idx)
+        self.vectorized_idx2chr = np.vectorize(lambda x: self.idx2chr[x])
 
     def __getitem__(self, index):
         """
@@ -220,6 +223,25 @@ class DatasetLoaderParser(data.Dataset):
         idxs = [self.char2idx[c] for c in target] + [self.char2idx[p] for p in padding]
         return torch.tensor(idxs, dtype=torch.int32)
 
+    def get_batch_cer(self, out_transcript, labels):
+
+        batch_size = len(out_transcript)
+        total_cer = 0
+        # iterate over batch - no other choice here
+        for i in range(batch_size):
+            transcript = out_transcript[i]
+            label = labels[i]
+
+            # post processing a transcript - removing duplicates and blank symbol
+            transcript = self.transcript_postprocessing(transcript)
+
+            # remove padding from label
+            label = self.label_postprocessing(label)
+
+            total_cer += cer(transcript, label)
+
+        return total_cer
+
     def transcript_postprocessing(self, seq_labels):
 
         # first step - remove duplicates
@@ -235,7 +257,5 @@ class DatasetLoaderParser(data.Dataset):
 
         return out_transcript
 
-    def idx_transcript_to_word(self, out_transcript):
-        idx2char = {value: key for key, value in self.char2idx.values()}
-        word = "".join([idx2char[idx] for idx in out_transcript])
-        return word
+    def label_postprocessing(self, label):
+        return "".join(label[label != self.pad_symbol])
