@@ -14,7 +14,7 @@ train_loader = torch.utils.data.DataLoader(
 
 validation_dataset = DatasetLoaderParser('./data/valid')
 validation_loader = torch.utils.data.DataLoader(
-        validation_dataset, batch_size=32, shuffle=None,
+        validation_dataset, batch_size=32, shuffle=True,
         num_workers=12, pin_memory=True, sampler=None)
 
 # pre and post processing variables
@@ -132,4 +132,5 @@ for epoch in range(num_epochs):
 
         if epoch_cer < lowest_validation_cer:
             lowest_validation_cer = epoch_cer
+            print(f"Epoch {epoch + 1} saving model parameters")
             torch.save(model.state_dict(), "deep_speech.pth")
