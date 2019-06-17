@@ -14,13 +14,13 @@ class DeepSpeech(nn.Module):
         self.lstm_1 = nn.LSTM(input_size=510, hidden_size=200, bidirectional=True)
         self.dropout2 = nn.Dropout(p=0.5)
         self.lstm2 = nn.LSTM(input_size=400, hidden_size=100, bidirectional=True)
-        self.fc_bn = nn.BatchNorm1d(200)
+        self.fc_bn = nn.BatchNorm1d(11)
         self.fc = nn.Linear(in_features=200, out_features=vocab_size)
 
     def forward(self, input_):
         x = self.dropout1(input_)
         x = self.conv1_bn(F.relu(self.conv1(x)))
-        x = self.conv2(F.relu(self.conv2(x)))
+        x = self.conv2_bn(F.relu(self.conv2(x)))
         N, C, F_, T = x.size()
         x = x.view(N, C * F_, T)  # flatten on feature maps axis
         x = x.permute(2, 0, 1)  # Sequence, Batch, Features
