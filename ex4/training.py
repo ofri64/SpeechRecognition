@@ -25,9 +25,9 @@ pad_idx = char_vocab[train_dataset.pad_symbol]
 # define device. network and training properties
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = DeepSpeech(vocab_size=len(char_vocab)).to(device)
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.Adam(model.parameters(), lr=0.01)
 ctc_loss = nn.CTCLoss()
-num_epochs = 75
+num_epochs = 120
 lowest_validation_cer = 10000
 
 for epoch in range(num_epochs):
@@ -125,9 +125,10 @@ for epoch in range(num_epochs):
                 # post processing transcript and labels
                 transcript = validation_dataset.transcript_postprocessing(transcript)
                 label_transcript = validation_dataset.label_postprocessing(label)
-                print(f"Model predicted transcript: \"{transcript}\", while gold label is: \"{label_transcript}\"")
+                cer = validation_dataset.get_batch_cer(transcript, label_transcript)
+                print(f"Model predicted transcript: \"{transcript}\", while gold label is: \"{label_transcript}\" - CER is: {cer}")
 
-        epoch_cer = total_cer / num_train_samples
+        epoch_cer = total_cer / num_validation_samples
         print(f"Epoch {epoch + 1}: Validation set CER is: {epoch_cer}")
 
         if epoch_cer < lowest_validation_cer:
