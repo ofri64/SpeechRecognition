@@ -4,6 +4,7 @@ import torch.optim as optim
 
 from gcommand_loader import DatasetLoaderParser
 from networks import DeepSpeech
+from cer import cer
 
 # load train and validation datasets
 
@@ -125,7 +126,7 @@ for epoch in range(num_epochs):
                 # post processing transcript and labels
                 transcript = validation_dataset.transcript_postprocessing(transcript)
                 label_transcript = validation_dataset.label_postprocessing(label)
-                cer = validation_dataset.get_batch_cer(transcript, label_transcript)
+                cer = cer(transcript, label_transcript)
                 print(f"Model predicted transcript: \"{transcript}\", while gold label is: \"{label_transcript}\" - CER is: {cer}")
 
         epoch_cer = total_cer / num_validation_samples
