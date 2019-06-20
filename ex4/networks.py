@@ -34,3 +34,55 @@ class DeepSpeech(nn.Module):
         x = F.log_softmax(x, dim=2)
         x = x.permute(1, 0, 2)  # transpose again but now to Sequence, Batch, Features - this is mandatory for CTC loss
         return x
+
+
+class DeeperDeepSpeech(nn.Module):
+
+    def __init__(self, vocab_size):
+        super(DeeperDeepSpeech, self).__init__()
+        self.vocab_size = vocab_size
+        self.input_drop = nn.Dropout(p=0.4)
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=15, kernel_size=3, stride=2)
+        self.conv1_bn = nn.BatchNorm2d(15)
+        self.conv1_dropout = nn.Dropout(p=0.5)
+        self.conv2 = nn.Conv2d(in_channels=15, out_channels=30, kernel_size=2, stride=2)
+        self.conv2_bn = nn.BatchNorm2d(30)
+        self.conv2_dropout = nn.Dropout(p=0.4)
+        self.conv3 = nn.Conv2d(in_channels=30, out_channels=45, kernel_size=2, stride=2)
+        self.conv3_bn = nn.BatchNorm2d(45)
+        self.conv3_dropout = nn.Dropout(p=0.5)
+        self.lstm1 = nn.LSTM(input_size=900, hidden_size=250, bidirectional=True)
+        self.lstm1_dropout = nn.Dropout(p=0.5)
+        self.lstm2 = nn.LSTM(input_size=500, hidden_size=150, bidirectional=True)
+        self.lstm2_dropout = nn.Dropout(p=0.3)
+        self.fc1 = nn.Linear(in_features=300, out_features=100)
+        self.fc1_bn = nn.BatchNorm1d(12)
+        self.fc1_dropout = nn.Dropout(p=0.4)
+        self.fc2 = nn.Linear(in_features=100, out_features=vocab_size)
+
+    def forward(self, input_):
+        x = self.input_drop(input_)
+        x = F.relu(self.conv1(x))
+        x = self.conv1_bn(x)
+        x = self.conv1_dropout(x)
+        x = F.relu(self.conv2(x))
+        x = self.conv2_bn(x)
+        x = self.conv2_dropout(x)
+        x = F.relu(self.conv3(x))
+        x = self.conv3_bn(x)
+        x = self.conv3_dropout(x)
+        N, C, F_, T = x.size()
+        x = x.view(N, C * F_, T)  # flatten on feature maps axis
+        x = x.permute(2, 0, 1)  # Sequence, Batch, Features
+        x, _ = self.lstm1(x)
+        x = self.lstm1_dropout(x)
+        x, _ = self.lstm2(x)
+        x = self.lstm2_dropout(x)
+        x = x.permute(1, 0, 2)  # transpose to Batch, Sequence, Features
+        x = F.relu(self.fc1(x))
+        x = self.fc1_bn(x)
+        x = self.fc1_dropout(x)
+        x = self.fc2(x)
+        x = F.log_softmax(x, dim=2)
+        x = x.permute(1, 0, 2)  # transpose again but now to Sequence, Batch, Features - this is mandatory for CTC loss
+        return x

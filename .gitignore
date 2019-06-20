@@ -27,3 +27,6 @@ details.txt
 # ignore wav files
 *.wav
 *.WAV
+
+# ignore log files
+log_*.txt

@@ -3,20 +3,27 @@ import torch.nn as nn
 import torch.optim as optim
 
 from gcommand_loader import DatasetLoaderParser
-from networks import DeepSpeech
+import networks
 from cer import cer
 
+
+def define_model_computing_conf(model_, single_batch_size=32):
+    device_ = None
+    batch_size_ = single_batch_size
+    if not torch.cuda.is_available():  # only CPU
+        device_ = torch.device("cpu")
+    elif torch.cuda.device_count() == 1:  # single GPU
+        device_ = torch.device("cuda:0")
+    else:  # multiple GPUs
+        model_ = nn.DataParallel(model_)
+        batch_size_ = single_batch_size * torch.cuda.device_count()
+
+    return model_.to(device_), device_, batch_size_
+
+
 # load train and validation datasets
-
 train_dataset = DatasetLoaderParser('./data/train')
-train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=32, shuffle=True,
-        num_workers=12, pin_memory=True, sampler=None)
-
 validation_dataset = DatasetLoaderParser('./data/valid')
-validation_loader = torch.utils.data.DataLoader(
-        validation_dataset, batch_size=32, shuffle=True,
-        num_workers=12, pin_memory=True, sampler=None)
 
 # pre and post processing variables
 char_vocab = train_dataset.char2idx
@@ -24,12 +31,21 @@ idx2char = train_dataset.idx2chr
 pad_idx = char_vocab[train_dataset.pad_symbol]
 
 # define device. network and training properties
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = DeepSpeech(vocab_size=len(char_vocab)).to(device)
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+model = networks.DeeperDeepSpeech(vocab_size=len(char_vocab))
+model, device, batch_size = define_model_computing_conf(model)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 ctc_loss = nn.CTCLoss()
-num_epochs = 120
+num_epochs = 80
 lowest_validation_cer = 10000
+
+# prepare training and validation loaders
+train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=12, pin_memory=True, sampler=None)
+
+validation_loader = torch.utils.data.DataLoader(
+        validation_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=12, pin_memory=True, sampler=None)
 
 for epoch in range(num_epochs):
 
