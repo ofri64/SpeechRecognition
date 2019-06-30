@@ -25,11 +25,14 @@ pad_idx = char_vocab[train_dataset.pad_symbol]
 
 # define device. network and training properties
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = networks.DeeperDeepSpeech(vocab_size=len(char_vocab)).to(device)
+model = networks.DeepSpeech(vocab_size=len(char_vocab)).to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 ctc_loss = nn.CTCLoss()
-num_epochs = 80
+num_epochs = 50
 lowest_validation_cer = 10000
+
+print(model)
+print("Starting to train")
 
 for epoch in range(num_epochs):
 
