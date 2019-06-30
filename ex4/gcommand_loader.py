@@ -259,3 +259,16 @@ class DatasetLoaderParser(data.Dataset):
 
     def label_postprocessing(self, label):
         return "".join(label[label != self.pad_symbol])
+
+
+class TestDataLoaderParser(DatasetLoaderParser):
+
+    def __getitem__(self, index):
+        full_path, _ = self.spects[index]
+        spect = self.loader(full_path, self.window_size, self.window_stride, self.window_type, self.normalize, self.max_len)
+        if self.transform is not None:
+            spect = self.transform(spect)
+
+        file_name = os.path.split(full_path)[-1]
+
+        return file_name, spect

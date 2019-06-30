@@ -32,6 +32,7 @@ num_epochs = 50
 lowest_validation_cer = 10000
 
 print(model)
+print(optimizer)
 print("Starting to train")
 
 for epoch in range(num_epochs):
