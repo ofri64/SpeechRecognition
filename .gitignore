@@ -12,8 +12,9 @@ test_files/
 */__pycache__
 __pycache__
 
-# ignore pdf
+# ignore pdf and docx
 *.pdf
+*.docx
 
 # ignore .DS_STORE
 .DS_STORE
@@ -30,3 +31,9 @@ details.txt
 
 # ignore log files
 log_*.txt
+
+# igore pth files (saved models)
+*.pth
+
+# ignore results files
+test_y*

@@ -58,6 +58,7 @@ with torch.no_grad():
 
     # predict for test set
     with open("test_y.txt", "w") as f:
+        num_files = 0
         for data in test_loader:
             file_paths, inputs = data[0], data[1].to(device)
 
@@ -65,11 +66,15 @@ with torch.no_grad():
             output = model(inputs)
             _, predicted = torch.max(output, dim=2)
             predicted = predicted.permute(1, 0)  # transform to dimension (Batch, Timestamps)
+            batch_size = predicted.size()[0]
 
             # post processing and writing to file
             out_transcript = validation_dataset.vectorized_idx2chr(predicted.cpu().numpy())
 
-            for i in range(len(output)):
+            for i in range(batch_size):
                 file_name = file_paths[i]
                 predicted_transcript = test_dataset.transcript_postprocessing(out_transcript[i])
                 f.write(f"{file_name}, {predicted_transcript}\n")
+                num_files += 1
+
+    print(f"Predicted results for {num_files} files")
