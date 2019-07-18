@@ -57,7 +57,7 @@ with torch.no_grad():
     print(f"Validation set CER is: {validation_cer}")
 
     # predict for test set
-    with open("test_y.txt", "w") as f:
+    with open("test_y", "w") as f:
         num_files = 0
         for data in test_loader:
             file_paths, inputs = data[0], data[1].to(device)
